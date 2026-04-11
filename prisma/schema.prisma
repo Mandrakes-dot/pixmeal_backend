@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum GoalType {
+  LOSE_WEIGHT
+  MAINTAIN_WEIGHT
+  GAIN_WEIGHT
+}
+
+enum NotificationType {
+  REMINDER
+  WARNING
+  INFO
+  SUCCESS
+}
+
+enum MealEntryType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+
+  email    String? @unique
+  appleSub String? @unique
+
+  dateOfBirth      DateTime?
+  weight           Float?
+  height           Float?
+  goalType         GoalType?
+  gender           Gender?
+  recipes          Recipe[]
+  mealEntries      MealEntry[]
+  notifications    Notification[]
+  macroGoals       MacroGoal[]
+  userAchievements UserAchievement[]
+  userPreferences  UserFoodPreference[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model Achievement {
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  description      String?
+  imageUrl         String?
+  userAchievements UserAchievement[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  earnedAt      DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model FoodPreference {
+  id              Int                  @id @default(autoincrement())
+  name            String               @unique
+  description     String?
+  userPreferences UserFoodPreference[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model UserFoodPreference {
+  id               Int            @id @default(autoincrement())
+  userId           Int
+  foodPreferenceId Int
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodPreference   FoodPreference @relation(fields: [foodPreferenceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, foodPreferenceId])
+}
+
+model Recipe {
+  id            Int              @id @default(autoincrement())
+  name          String
+  totalCalories Float?
+  urlImage      String?
+  creationDate  DateTime         @default(now())
+  userId        Int
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipeItems   RecipeFoodItem[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model FoodItem {
+  id          Int              @id @default(autoincrement())
+  name        String
+  weight      Float?
+  recipeItems RecipeFoodItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model RecipeFoodItem {
+  id         Int      @id @default(autoincrement())
+  recipeId   Int
+  foodItemId Int
+  quantity   Float
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  foodItem   FoodItem @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, foodItemId])
+}
+
+model MealEntry {
+  id              Int           @id @default(autoincrement())
+  entryDate       DateTime
+  entryType       MealEntryType
+  totalCalories   Float?
+  weight          Float?
+  photoUrl        String?
+  confidenceScore Float?
+  proteins        Float?
+  carbs           Float?
+  fat             Float?
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Notification {
+  id               Int              @id @default(autoincrement())
+  notificationType NotificationType
+  message          String
+  sendTime         DateTime
+  userId           Int
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model MacroGoal {
+  id             Int      @id @default(autoincrement())
+  caloriesPerDay Float
+  proteins       Float
+  carbs          Float
+  fat            Float
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
