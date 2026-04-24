@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Gender {
@@ -49,7 +48,7 @@ model User {
   recipes          Recipe[]
   mealEntries      MealEntry[]
   notifications    Notification[]
-  macroGoals       MacroGoal[]
+  macroGoal        MacroGoal?
   userAchievements UserAchievement[]
   userPreferences  UserFoodPreference[]
   createdAt        DateTime             @default(now())
@@ -158,13 +157,12 @@ model Notification {
 }
 
 model MacroGoal {
-  id             Int      @id @default(autoincrement())
+  id             Int   @id @default(autoincrement())
   caloriesPerDay Float
   proteins       Float
   carbs          Float
   fat            Float
-  userId         Int
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
