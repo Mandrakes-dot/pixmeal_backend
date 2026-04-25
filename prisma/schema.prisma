@@ -53,6 +53,28 @@ model User {
   macroGoal        MacroGoal?
   userAchievements UserAchievement[]
   userPreferences  UserFoodPreference[]
+  files            FileObject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FileObject {
+  id        Int    @id @default(autoincrement())
+  bucket    String
+  objectKey String @unique
+
+  url      String?
+  fileName String?
+  mimeType String?
+  size     Int?
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  mealEntryPhotos   MealEntry[]   @relation("MealEntryPhoto")
+  recipeImages      Recipe[]      @relation("RecipeImage")
+  achievementImages Achievement[] @relation("AchievementImage")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,11 +120,13 @@ model MealEntry {
   entryType       MealEntryType
   totalCalories   Float?
   weight          Float?
-  photoUrl        String?
   confidenceScore Float?
   proteins        Float?
   carbs           Float?
   fat             Float?
+
+  photoFileId Int?
+  photoFile   FileObject? @relation("MealEntryPhoto", fields: [photoFileId], references: [id], onDelete: SetNull)
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -115,10 +139,13 @@ model MealEntry {
 }
 
 model Achievement {
-  id               Int               @id @default(autoincrement())
-  name             String            @unique
-  description      String?
-  imageUrl         String?
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  imageFileId Int?
+  imageFile   FileObject? @relation("AchievementImage", fields: [imageFileId], references: [id], onDelete: SetNull)
+
   userAchievements UserAchievement[]
 
   createdAt DateTime @default(now())
@@ -138,9 +165,10 @@ model UserAchievement {
 }
 
 model FoodPreference {
-  id              Int                  @id @default(autoincrement())
-  name            String               @unique
-  description     String?
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
   userPreferences UserFoodPreference[]
 
   createdAt DateTime @default(now())
@@ -162,8 +190,10 @@ model Recipe {
   id            Int      @id @default(autoincrement())
   name          String
   totalCalories Float?
-  urlImage      String?
   creationDate  DateTime @default(now())
+
+  imageFileId Int?
+  imageFile   FileObject? @relation("RecipeImage", fields: [imageFileId], references: [id], onDelete: SetNull)
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
