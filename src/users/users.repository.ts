@@ -14,6 +14,13 @@ export class UsersRepository {
     });
   }
 
+  findByAppleSub(appleSub: string) {
+    return this.prismaService.user.findUnique({
+      where: { appleSub },
+      include: { macroGoal: true },
+    });
+  }
+
   createUser(createUserDto: CreateUserDto) {
     return this.prismaService.user.create({
       data: {

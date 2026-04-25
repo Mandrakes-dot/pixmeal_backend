@@ -36,13 +36,11 @@ export class CreateUserDto {
   @IsString()
   lastName: string;
 
-  @IsOptional()
   @IsEmail()
-  email?: string;
+  email: string;
 
-  @IsOptional()
   @IsString()
-  appleSub?: string;
+  appleSub: string;
 
   @IsOptional()
   @IsDateString()
