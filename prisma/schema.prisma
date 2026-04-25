@@ -37,95 +37,59 @@ model User {
   firstName String
   lastName  String
 
-  email    String? @unique
-  appleSub String? @unique
+  email    String @unique
+  appleSub String @unique
 
-  dateOfBirth      DateTime?
-  weight           Float?
-  height           Float?
-  goalType         GoalType?
-  gender           Gender?
+  dateOfBirth DateTime?
+  weight      Float?
+  height      Float?
+  goalType    GoalType?
+  gender      Gender?
+
   recipes          Recipe[]
   mealEntries      MealEntry[]
+  dailyLogs        DailyNutritionLog[]
   notifications    Notification[]
   macroGoal        MacroGoal?
   userAchievements UserAchievement[]
   userPreferences  UserFoodPreference[]
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Achievement {
-  id               Int               @id @default(autoincrement())
-  name             String            @unique
-  description      String?
-  imageUrl         String?
-  userAchievements UserAchievement[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+model MacroGoal {
+  id             Int   @id @default(autoincrement())
+  caloriesPerDay Float
+  proteins       Float
+  carbs          Float
+  fat            Float
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model UserAchievement {
-  id            Int         @id @default(autoincrement())
-  userId        Int
-  achievementId Int
-  earnedAt      DateTime    @default(now())
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+model DailyNutritionLog {
+  id   Int      @id @default(autoincrement())
+  date DateTime
 
-  @@unique([userId, achievementId])
-}
+  totalCalories Float @default(0)
+  proteins      Float @default(0)
+  carbs         Float @default(0)
+  fat           Float @default(0)
 
-model FoodPreference {
-  id              Int                  @id @default(autoincrement())
-  name            String               @unique
-  description     String?
-  userPreferences UserFoodPreference[]
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-}
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model UserFoodPreference {
-  id               Int            @id @default(autoincrement())
-  userId           Int
-  foodPreferenceId Int
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  foodPreference   FoodPreference @relation(fields: [foodPreferenceId], references: [id], onDelete: Cascade)
+  mealEntries MealEntry[]
 
-  @@unique([userId, foodPreferenceId])
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model Recipe {
-  id            Int              @id @default(autoincrement())
-  name          String
-  totalCalories Float?
-  urlImage      String?
-  creationDate  DateTime         @default(now())
-  userId        Int
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeItems   RecipeFoodItem[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-}
-
-model FoodItem {
-  id          Int              @id @default(autoincrement())
-  name        String
-  weight      Float?
-  recipeItems RecipeFoodItem[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-}
-
-model RecipeFoodItem {
-  id         Int      @id @default(autoincrement())
-  recipeId   Int
-  foodItemId Int
-  quantity   Float
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  foodItem   FoodItem @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
-
-  @@unique([recipeId, foodItemId])
+  @@unique([userId, date])
 }
 
 model MealEntry {
@@ -139,10 +103,98 @@ model MealEntry {
   proteins        Float?
   carbs           Float?
   fat             Float?
-  userId          Int
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dailyNutritionLogId Int?
+  dailyNutritionLog   DailyNutritionLog? @relation(fields: [dailyNutritionLogId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Achievement {
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  description      String?
+  imageUrl         String?
+  userAchievements UserAchievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserAchievement {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  earnedAt      DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model FoodPreference {
+  id              Int                  @id @default(autoincrement())
+  name            String               @unique
+  description     String?
+  userPreferences UserFoodPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserFoodPreference {
+  id               Int @id @default(autoincrement())
+  userId           Int
+  foodPreferenceId Int
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodPreference FoodPreference @relation(fields: [foodPreferenceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, foodPreferenceId])
+}
+
+model Recipe {
+  id            Int      @id @default(autoincrement())
+  name          String
+  totalCalories Float?
+  urlImage      String?
+  creationDate  DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipeItems RecipeFoodItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FoodItem {
+  id     Int    @id @default(autoincrement())
+  name   String
+  weight Float?
+
+  recipeItems RecipeFoodItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RecipeFoodItem {
+  id         Int   @id @default(autoincrement())
+  recipeId   Int
+  foodItemId Int
+  quantity   Float
+
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  foodItem FoodItem @relation(fields: [foodItemId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, foodItemId])
 }
 
 model Notification {
@@ -150,19 +202,10 @@ model Notification {
   notificationType NotificationType
   message          String
   sendTime         DateTime
-  userId           Int
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-}
 
-model MacroGoal {
-  id             Int   @id @default(autoincrement())
-  caloriesPerDay Float
-  proteins       Float
-  carbs          Float
-  fat            Float
-
-  userId Int  @unique
+  userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
