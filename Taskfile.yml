@@ -1,0 +1,71 @@
+version: '3'
+
+dir: .
+
+tasks:
+  install:
+    desc: Install dependencies
+    cmds:
+      - npm ci
+
+  build:
+    desc: Build Docker images
+    cmds:
+      - docker compose build
+
+  lint:
+    desc: Run ESLint
+    cmds:
+      - npm run lint
+
+  test:
+    desc: Run tests
+    cmds:
+      - npm run test
+
+  ci:
+    desc: Run lint → test → build sequence
+    cmds:
+      - task: lint
+      - task: test
+      - task: build
+
+  deploy:
+    desc: Deploy stack locally
+    cmds:
+      - docker compose up -d
+
+  logs:
+    desc: Show logs (specify SERVICE=app)
+    cmds:
+      - docker compose logs -f
+
+  restart:
+    desc: Restart a service
+    cmds:
+      - docker compose restart
+
+  stop:
+    desc: Stop the stack
+    cmds:
+      - docker compose down
+
+  clean:
+    desc: Remove containers and volumes
+    cmds:
+      - docker compose down -v
+
+  push:
+    desc: Build and push image to registry
+    vars:
+      TAG:
+        sh: git rev-parse --short HEAD
+    cmds:
+      - docker build -t pixmeal-backend:{{.TAG }} .
+      - docker push pixmeal-backend:{{.TAG }}
+
+  deploy:remote:
+    desc: Deploy to remote server
+    cmds:
+      - scp docker-compose.yml user@server:/app/
+      - ssh user@server 'cd /app && docker compose up -d'
