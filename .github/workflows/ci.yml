@@ -13,7 +13,7 @@ env:
   MINIO_ACCESS_KEY: "test"
   MINIO_SECRET_KEY: "test"
   MINIO_BUCKET: "test"
-  JWT_SECRET: "test-secret
+  JWT_SECRET: "test-secret"
 
 jobs:
   build-and-test:
