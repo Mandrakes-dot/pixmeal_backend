@@ -6,9 +6,18 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { MediasModule } from './minio/medias.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [MealsModule, UsersModule, MediasModule, AuthModule],
+  imports: [
+    MealsModule,
+    UsersModule,
+    MediasModule,
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [AppController, UsersController],
   providers: [AppService],
 })
