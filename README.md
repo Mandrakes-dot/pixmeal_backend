@@ -1,98 +1,501 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# PixMeal Backend - DevOps Documentation
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 1. Project context
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+PixMeal Backend is a NestJS API using PostgreSQL and Prisma.
 
-## Description
+The goal of this DevOps setup is to provide a reproducible development, test, and deployment environment using:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+* Docker
+* Docker Compose
+* PostgreSQL
+* Prisma
+* ESLint
+* Jest
+* Git workflow conventions
+* Continuous Integration
 
-## Project setup
+This documentation explains how another developer can install, run, test, and deploy the project.
 
-```bash
-$ npm install
+---
+
+## 2. Technical stack
+
+* Node.js 20
+* NestJS
+* TypeScript
+* PostgreSQL 16
+* Prisma ORM
+* Docker
+* Docker Compose
+* Jest
+* ESLint
+* Prettier
+* GitHub Actions / CI pipeline
+
+---
+
+## 3. Project structure
+
+```txt
+.
+├── src/                    # NestJS source code
+├── prisma/                 # Prisma schema and database configuration
+├── uploads/                # Uploaded files volume
+├── Dockerfile              # Production Docker image
+├── docker-compose.yml      # Local development environment
+├── docker-compose.prod.yml # Production-like deployment environment
+├── test.yml                # CI pipeline configuration
+├── Taskfile.yml            # Useful automation commands
+├── .env.example            # Example environment variables
+├── .gitignore              # Ignored files and secrets
+└── README.md               # Project documentation
 ```
 
-## Compile and run the project
+---
+
+## 4. Environment variables and secrets
+
+The project uses environment variables to configure the application and database.
+
+Create a local `.env` file from the example:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+The `.env` file contains secrets and must never be committed to Git.
+
+Only `.env.example` is versioned to show other developers which variables are required.
+
+Example variables:
+
+```env
+APP_PORT=3000
+
+POSTGRES_USER=pixmeal
+POSTGRES_PASSWORD=pixmeal
+POSTGRES_DB=pixmeal
+POSTGRES_PORT=5432
+
+DATABASE_URL=postgresql://pixmeal:pixmeal@db:5432/pixmeal
+
+JWT_SECRET=change_me
+JWT_EXPIRES_IN=1d
+```
+
+---
+
+## 5. Development environment with Docker Compose
+
+The development environment is based on Docker Compose.
+
+It contains two main services:
+
+| Service | Role                         |
+| ------- | ---------------------------- |
+| `app`   | Runs the NestJS backend      |
+| `db`    | Runs the PostgreSQL database |
+
+The application container depends on the database container.
+The database uses a healthcheck to make sure PostgreSQL is ready before the API starts.
+
+Start the environment:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up -d --build
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Show logs:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose logs -f
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Stop the environment:
 
-## Resources
+```bash
+docker compose down
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Stop the environment and remove volumes:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+docker compose down -v
+```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 6. Docker services
 
-## Stay in touch
+### app service
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The `app` service builds the NestJS application from the `Dockerfile`.
 
-## License
+It exposes the API on port `3000` by default.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```txt
+localhost:3000
+```
+
+The `uploads` folder is mounted as a volume so uploaded files can persist outside the container.
+
+### db service
+
+The `db` service uses the official PostgreSQL 16 Alpine image.
+
+Database data is stored in a Docker volume:
+
+```txt
+postgres_data
+```
+
+This allows the database to keep its data even if the container is restarted.
+
+---
+
+## 7. Useful Docker commands
+
+Build the images:
+
+```bash
+docker compose build
+```
+
+Start the containers:
+
+```bash
+docker compose up -d
+```
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+Restart a service:
+
+```bash
+docker compose restart app
+```
+
+Stop all services:
+
+```bash
+docker compose down
+```
+
+Clean containers and volumes:
+
+```bash
+docker compose down -v
+```
+
+---
+
+## 8. Local installation without Docker
+
+Install dependencies:
+
+```bash
+npm ci
+```
+
+Generate Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Run the application in development mode:
+
+```bash
+npm run start:dev
+```
+
+Build the application:
+
+```bash
+npm run build
+```
+
+Run the production build:
+
+```bash
+npm run start:prod
+```
+
+---
+
+## 9. Tests and code quality
+
+The project uses ESLint for static code analysis and Jest for unit tests.
+
+Run the linter:
+
+```bash
+npm run lint
+```
+
+Run unit tests:
+
+```bash
+npm run test
+```
+
+Run tests with coverage:
+
+```bash
+npm run test:cov
+```
+
+Run the full local CI sequence:
+
+```bash
+npm run ci
+```
+
+The local CI command runs:
+
+```txt
+lint → tests with coverage → build
+```
+
+---
+
+## 10. Git workflow
+
+The project uses GitHub Flow.
+
+### Branch strategy
+
+* `main` contains stable and validated code.
+* New work is done on feature branches.
+* Each feature branch is merged through a pull request.
+
+Branch examples:
+
+```txt
+feature/docker-environment
+feature/add-ci-pipeline
+feature/add-unit-tests
+fix/database-connection
+docs/update-readme
+```
+
+### Merge strategy
+
+Pull requests are reviewed before being merged.
+
+The preferred merge strategy is squash merge because it keeps the Git history clean and readable.
+
+### Commit convention
+
+The project follows Conventional Commits.
+
+Examples:
+
+```txt
+feat: add docker compose environment
+ci: add test pipeline
+test: add unit tests for auth service
+docs: document deployment process
+fix: update database connection configuration
+```
+
+### Secret management
+
+Secrets are not committed to Git.
+
+The following files are ignored:
+
+```txt
+.env
+.env.*
+```
+
+Only `.env.example` is committed.
+
+In the CI/CD platform, secrets must be stored in the platform secret manager, for example GitHub Actions Secrets or GitLab CI/CD Variables.
+
+---
+
+## 11. Continuous Integration
+
+The CI pipeline is triggered automatically on Git events such as:
+
+* push
+* pull request
+
+The pipeline validates the application before merging or deploying.
+
+Pipeline stages:
+
+```txt
+Push / Pull Request
+        ↓
+Checkout repository
+        ↓
+Install dependencies
+        ↓
+Run ESLint
+        ↓
+Run unit tests with coverage
+        ↓
+Build application
+        ↓
+Build Docker image
+        ↓
+Pipeline success or failure report
+```
+
+If one step fails, the pipeline stops and the code must be corrected before merging.
+
+---
+
+## 12. Deployment environment
+
+A production-like deployment environment is provided with Docker Compose.
+
+The deployment environment is defined in:
+
+```txt
+docker-compose.prod.yml
+```
+
+Start the production-like environment:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+Stop the production-like environment:
+
+```bash
+docker compose -f docker-compose.prod.yml down
+```
+
+The production-like environment uses:
+
+* isolated API and database containers
+* persistent PostgreSQL volume
+* persistent uploads volume
+* restart policy
+* environment variables for secrets
+* database healthcheck
+
+This setup can be deployed on any server with Docker and Docker Compose installed.
+
+---
+
+## 13. Taskfile commands
+
+The project includes a `Taskfile.yml` to simplify common commands.
+
+Install dependencies:
+
+```bash
+task install
+```
+
+Run linter:
+
+```bash
+task lint
+```
+
+Run tests with coverage:
+
+```bash
+task test:cov
+```
+
+Run the local CI sequence:
+
+```bash
+task ci
+```
+
+Start Docker environment:
+
+```bash
+task docker:up
+```
+
+View logs:
+
+```bash
+task docker:logs
+```
+
+Stop Docker environment:
+
+```bash
+task docker:stop
+```
+
+Deploy locally:
+
+```bash
+task deploy:local
+```
+
+---
+
+## 14. Troubleshooting
+
+### Database is not ready
+
+Check database logs:
+
+```bash
+docker compose logs -f db
+```
+
+Check if PostgreSQL is healthy:
+
+```bash
+docker compose ps
+```
+
+### API cannot connect to database
+
+Verify the `DATABASE_URL` variable.
+
+Inside Docker, the database host must be:
+
+```txt
+db
+```
+
+Example:
+
+```env
+DATABASE_URL=postgresql://pixmeal:pixmeal@db:5432/pixmeal
+```
+
+### Clean the environment
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+---
+
+## 15. DevOps summary
+
+This project implements the following DevOps practices:
+
+* containerized development environment
+* isolated services for API and database
+* reproducible setup with Docker Compose
+* environment variable management
+* Git workflow with branch and commit conventions
+* static analysis with ESLint
+* unit tests with Jest
+* coverage report
+* automated CI pipeline
+* production-like deployment environment
+* documented commands for developers

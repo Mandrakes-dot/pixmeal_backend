@@ -1,71 +1,65 @@
 version: '3'
 
-dir: .
-
 tasks:
   install:
     desc: Install dependencies
     cmds:
       - npm ci
 
-  build:
-    desc: Build Docker images
-    cmds:
-      - docker compose build
-
   lint:
-    desc: Run ESLint
+    desc: Run ESLint static analysis
     cmds:
       - npm run lint
 
   test:
-    desc: Run tests
+    desc: Run unit tests
     cmds:
       - npm run test
 
-  ci:
-    desc: Run lint → test → build sequence
+  test:cov:
+    desc: Run unit tests with coverage
     cmds:
-      - task: lint
-      - task: test
-      - task: build
+      - npm run test:cov
 
-  deploy:
-    desc: Deploy stack locally
+  build:
+    desc: Build the NestJS application
+    cmds:
+      - npm run build
+
+  docker:build:
+    desc: Build Docker images
+    cmds:
+      - docker compose build
+
+  docker:up:
+    desc: Start local Docker environment
     cmds:
       - docker compose up -d
 
-  logs:
-    desc: Show logs (specify SERVICE=app)
+  docker:logs:
+    desc: Show Docker logs
     cmds:
       - docker compose logs -f
 
-  restart:
-    desc: Restart a service
-    cmds:
-      - docker compose restart
-
-  stop:
-    desc: Stop the stack
+  docker:stop:
+    desc: Stop Docker environment
     cmds:
       - docker compose down
 
-  clean:
-    desc: Remove containers and volumes
+  docker:clean:
+    desc: Stop Docker environment and remove volumes
     cmds:
       - docker compose down -v
 
-  push:
-    desc: Build and push image to registry
-    vars:
-      TAG:
-        sh: git rev-parse --short HEAD
+  ci:
+    desc: Run local CI sequence
     cmds:
-      - docker build -t pixmeal-backend:{{.TAG }} .
-      - docker push pixmeal-backend:{{.TAG }}
+      - task: lint
+      - task: test:cov
+      - task: build
+      - task: docker:build
 
-  deploy:remote:
-    desc: Deploy to remote server
+  deploy:local:
+    desc: Deploy stack locally with Docker Compose
     cmds:
-      - scp docker-compose.yml user@server:/app/
-      - ssh user@server 'cd /app && docker compose up -d'
+      - docker compose up -d --build

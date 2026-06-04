@@ -28,13 +28,8 @@ export class MediasController {
 
   @Post('presigned-url')
   @Protect()
-  async getPresignedUrl(
-    @Body() body: { key: string; mimeType: string },
-  ) {
-    const url = await this.s3Service.getPresignedUrl(
-      body.key,
-      body.mimeType,
-    );
+  async getPresignedUrl(@Body() body: { key: string; mimeType: string }) {
+    const url = await this.s3Service.getPresignedUrl(body.key, body.mimeType);
 
     return {
       url,

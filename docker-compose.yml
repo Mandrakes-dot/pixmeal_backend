@@ -3,33 +3,60 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: pixmeal_api
     ports:
       - '${APP_PORT:-3000}:3000'
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-pixmeal}:${POSTGRES_PASSWORD:-pixmeal}@db:5432/${POSTGRES_DB:-pixmeal}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pixmeal}:${POSTGRES_PASSWORD:-pixmeal}@db:5432/${POSTGRES_DB:-pixmeal}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
     volumes:
       - ./uploads:/app/uploads
+    networks:
+      - pixmeal_network
+    healthcheck:
+      test: ['CMD-SHELL', 'wget --spider -q http://localhost:3000 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
 
   db:
     image: postgres:16-alpine
+    container_name: pixmeal_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-pixmeal}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pixmeal}
       POSTGRES_DB: ${POSTGRES_DB:-pixmeal}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-pixmeal}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-pixmeal} -d ${POSTGRES_DB:-pixmeal}']
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - pixmeal_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
 
 volumes:
   postgres_data:
+
+networks:
+  pixmeal_network:
+    driver: bridge

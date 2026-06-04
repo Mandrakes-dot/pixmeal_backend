@@ -12,6 +12,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:cov": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "deploy": "docker compose up -d",
@@ -19,7 +20,7 @@
     "logs": "docker compose logs -f",
     "stop": "docker compose down",
     "clean": "docker compose down -v",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "npm run lint && npm run test:cov && npm run build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1036.0",
