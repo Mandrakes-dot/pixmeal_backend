@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserMacroDto } from './_utils/dto/update-user-macro.dto';
 import { CurrentUser } from './_utils/decorator/connecter-user.decorator';
@@ -22,5 +22,11 @@ export class UsersController {
     @CurrentUser() user: User,
   ) {
     return this.usersService.updateUserMacroGoals(user.id, updateUserMacroDto);
+  }
+
+  @Delete()
+  @Protect()
+  deleteUser(@CurrentUser() user: User) {
+    return this.usersService.deleteUser(user.id);
   }
 }

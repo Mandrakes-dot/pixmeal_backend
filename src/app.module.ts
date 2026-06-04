@@ -6,6 +6,7 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { MediasModule } from './minio/medias.module';
 import { AuthModule } from './auth/auth.module';
+import { AchievementsModule } from './achievements/achievements.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -14,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     MediasModule,
     AuthModule,
+    AchievementsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
