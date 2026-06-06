@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixmeal Backend - DevOps Setup Documentation</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #f8f9fa;
+        color: #333;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #1a1a2e;
+      }
+      h2 {
+        font-size: 1.8rem;
+        margin: 40px 0 20px;
+        color: #16213e;
+        border-bottom: 2px solid #0f3460;
+        padding-bottom: 10px;
+      }
+      h3 {
+        font-size: 1.3rem;
+        margin: 25px 0 15px;
+        color: #0f3460;
+      }
+      p,
+      li {
+        font-size: 1rem;
+        color: #444;
+      }
+      code {
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 0.9rem;
+      }
+      pre {
+        background: #1a1a2e;
+        color: #e0e0e0;
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 15px 0;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        color: inherit;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 8px;
+      }
+      .badge-service {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .badge-container {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .badge-status {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .section {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .intro {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+      }
+      .intro h1,
+      .intro p {
+        color: white;
+      }
+      .intro p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
+      ul {
+        padding-left: 25px;
+      }
+      li {
+        margin: 8px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+      }
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+      }
+      .task-list {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .task-list dt {
+        font-weight: 600;
+        color: #0f3460;
+      }
+      .task-list dd {
+        margin-left: 0;
+        padding: 8px 0 20px 20px;
+        color: #555;
+      }
+      .env-table th {
+        background: #0f3460;
+        color: white;
+      }
+      .env-table tr:nth-child(even) {
+        background: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="intro">
+      <h1>Pixmeal Backend DevOps Setup</h1>
+      <p>
+        Complete documentation for containerization, deployment, and CI/CD
+        workflows
+      </p>
+    </div>
+
+    <section class="section">
+      <h2>Overview</h2>
+      <p>
+        The Pixmeal Backend uses a modern DevOps stack built on Docker
+        containers, providing consistent environments across development and
+        production. The setup includes a Node.js NestJS API, PostgreSQL
+        database, and automated testing and deployment pipelines.
+      </p>
+
+      <h3 style="margin-top: 25px">Architecture</h3>
+      <table>
+        <tr>
+          <th>Component</th>
+          <th>Technology</th>
+          <th>Purpose</th>
+        </tr>
+        <tr>
+          <td>API Server</td>
+          <td>
+            <span class="badge badge-service">Node.js</span
+            ><span class="badge badge-service">NestJS</span>
+          </td>
+          <td>RESTful API with JWT authentication</td>
+        </tr>
+        <tr>
+          <td>Database</td>
+          <td><span class="badge badge-service">PostgreSQL 16</span></td>
+          <td>Primary data store with Prisma ORM</td>
+        </tr>
+        <tr>
+          <td>Container Runtime</td>
+          <td><span class="badge badge-container">Docker</span></td>
+          <td>Application containerization</td>
+        </tr>
+        <tr>
+          <td>Orchestration</td>
+          <td><span class="badge badge-container">Docker Compose</span></td>
+          <td>Multi-container management</td>
+        </tr>
+        <tr>
+          <td>Task Automation</td>
+          <td><span class="badge badge-service">Task</span></td>
+          <td>DevOps command runner</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Docker Configuration</h2>
+
+      <h3>Multi-stage Dockerfile</h3>
+      <p>The project uses a multi-stage Docker build to optimize image size:</p>
+      <pre><code>FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["npm", "run", "start:prod"]</code></pre>
+
+      <ul>
+        <li>
+          <strong>Builder stage:</strong> Installs dependencies, generates
+          Prisma client, builds TypeScript
+        </li>
+        <li>
+          <strong>Production stage:</strong> Runs only the compiled output,
+          keeping image minimal (~150MB)
+        </li>
+        <li>Node.js 20 Alpine base for security and size</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Docker Compose Stack</h2>
+
+      <h3>Services</h3>
+      <table>
+        <tr>
+          <th>Service</th>
+          <th>Image</th>
+          <th>Ports</th>
+        </tr>
+        <tr>
+          <td>app</td>
+          <td>Built from Dockerfile</td>
+          <td>3000 (configurable)</td>
+        </tr>
+        <tr>
+          <td>db</td>
+          <td>postgres:16-alpine</td>
+          <td>5432</td>
+        </tr>
+      </table>
+
+      <h3>Volumes</h3>
+      <ul>
+        <li><code>postgres_data</code> - Persists database across restarts</li>
+        <li><code>./uploads</code> - File upload directory</li>
+      </ul>
+
+      <h3>Health Checks</h3>
+      <p>
+        The database service includes a health check using
+        <code>pg_isready</code> to ensure the app doesn't start until the
+        database is ready.
+      </p>
+
+      <h3>Environment Variables</h3>
+      <table class="env-table">
+        <tr>
+          <th>Variable</th>
+          <th>Default</th>
+        </tr>
+        <tr>
+          <td>APP_PORT</td>
+          <td>3000</td>
+        </tr>
+        <tr>
+          <td>POSTGRES_USER</td>
+          <td>pixmeal</td>
+        </tr>
+        <tr>
+          <td>POSTGRES_PASSWORD</td>
+          <td>pixmeal</td>
+        </tr>
+        <tr>
+          <td>POSTGRES_DB</td>
+          <td>pixmeal</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Task Automation (Taskfile.yml)</h2>
+      <p>
+        The project uses Task (taskfile.dev) as a cross-platform task runner.
+        It's more portable than Makefiles and works on Windows, macOS, and
+        Linux.
+      </p>
+
+      <h3>Available Tasks</h3>
+      <dl class="task-list">
+        <dt>task install</dt>
+        <dd>Install npm dependencies using npm ci (deterministic)</dd>
+
+        <dt>task build</dt>
+        <dd>Build Docker images using docker compose build</dd>
+
+        <dt>task lint</dt>
+        <dd>Run ESLint on the src directory</dd>
+
+        <dt>task test</dt>
+        <dd>Run Jest test suite</dd>
+
+        <dt>task ci</dt>
+        <dd>Run lint → test → build sequence (full CI pipeline)</dd>
+
+        <dt>task deploy</dt>
+        <dd>Deploy stack locally with docker compose up -d</dd>
+
+        <dt>task logs</dt>
+        <dd>Show logs (set SERVICE=app to filter)</dd>
+
+        <dt>task restart</dt>
+        <dd>Restart all services</dd>
+
+        <dt>task stop</dt>
+        <dd>Stop the stack (preserve volumes)</dd>
+
+        <dt>task clean</dt>
+        <dd>Remove containers AND volumes (WARNING: deletes data)</dd>
+
+        <dt>task push</dt>
+        <dd>Build and push image to registry with git hash tag</dd>
+
+        <dt>task deploy:remote</dt>
+        <dd>Deploy to remote server via SSH</dd>
+      </dl>
+    </section>
+
+    <section class="section">
+      <h2>CI/CD Pipeline</h2>
+
+      <h3>Local Development Workflow</h3>
+      <pre><code># Install deps and start in development
+task install
+task deploy
+
+# View logs
+task logs
+
+# Stop when done
+task stop</code></pre>
+
+      <h3>CI Validation</h3>
+      <pre><code># Run full CI pipeline
+task ci</code></pre>
+      <p>This runs: ESLint → Jest → Docker Build</p>
+
+      <h3>Production Deployment</h3>
+      <pre><code># Build and tag with commit hash
+task push
+
+# Deploy to remote server
+task deploy:remote</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Environment Configuration</h2>
+      <p>
+        The application uses a <code>.env</code> file for configuration. The
+        docker-compose.yml loads these variables automatically.
+      </p>
+
+      <h3>Required Variables</h3>
+      <table class="env-table">
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>DATABASE_URL</td>
+          <td>PostgreSQL connection string</td>
+        </tr>
+        <tr>
+          <td>JWT_SECRET</td>
+          <td>Secret key for JWT signing</td>
+        </tr>
+        <tr>
+          <td>MINIO_ENDPOINT</td>
+          <td>S3-compatible storage endpoint</td>
+        </tr>
+        <tr>
+          <td>MINIO_ACCESS_KEY</td>
+          <td>S3 access key</td>
+        </tr>
+        <tr>
+          <td>MINIO_SECRET_KEY</td>
+          <td>S3 secret key</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Technology Stack</h2>
+      <table>
+        <tr>
+          <th>Category</th>
+          <th>Technology</th>
+          <th>Version</th>
+        </tr>
+        <tr>
+          <td>Runtime</td>
+          <td>Node.js</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <td>Framework</td>
+          <td>NestJS</td>
+          <td>11.x</td>
+        </tr>
+        <tr>
+          <td>Database</td>
+          <td>PostgreSQL</td>
+          <td>16</td>
+        </tr>
+        <tr>
+          <td>ORM</td>
+          <td>Prisma</td>
+          <td>7.x</td>
+        </tr>
+        <tr>
+          <td>Auth</td>
+          <td>Passport JWT</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Testing</td>
+          <td>Jest</td>
+          <td>29.x</td>
+        </tr>
+        <tr>
+          <td>Linting</td>
+          <td>ESLint</td>
+          <td>9.x</td>
+        </tr>
+        <tr>
+          <td>Container</td>
+          <td>Docker</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Task Runner</td>
+          <td>Task</td>
+          <td>-</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Quick Reference</h2>
+      <pre><code># Prerequisites: Docker, Task (go-task.github.io)
+
+# Development
+task install    # Install dependencies
+task deploy    # Start stack
+task logs      # View logs
+task stop     # Stop stack
+
+# Testing
+task lint     # Lint code
+task test     # Run tests
+task ci       # Full CI
+
+# Production
+task build    # Build images
+task push     # Push to registry
+task deploy:remote  # Deploy to server</code></pre>
+    </section>
+  </body>
+</html>

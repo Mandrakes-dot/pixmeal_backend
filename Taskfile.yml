@@ -11,6 +11,11 @@ tasks:
     cmds:
       - npm run lint
 
+  lint:fix:
+    desc: Fix ESLint and Prettier formatting errors
+    cmds:
+      - npm run lint:fix
+
   test:
     desc: Run unit tests
     cmds:
