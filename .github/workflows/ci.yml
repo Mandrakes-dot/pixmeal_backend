@@ -70,7 +70,7 @@ jobs:
 
       - name: Create MinIO bucket
         run: |
-          docker run --rm --network host minio/mc:latest sh -c "
+          docker run --rm --network host --entrypoint /bin/sh minio/mc:latest -c "
             mc alias set local http://localhost:9000 minio99 minio123 &&
             mc mb -p local/pixmeal &&
             mc anonymous set private local/pixmeal
