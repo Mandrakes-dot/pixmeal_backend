@@ -9,8 +9,8 @@ RUN npm ci
 
 COPY . .
 
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+ARG DATABASE_URL="postgresql://pixmeal:pixmeal@localhost:5432/pixmeal"
+ENV DATABASE_URL=${DATABASE_URL}
 
 RUN npx prisma generate
 RUN npm run build

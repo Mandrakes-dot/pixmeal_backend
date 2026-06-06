@@ -86,4 +86,7 @@ jobs:
         run: npm run build
 
       - name: Build Docker image
-        run: docker build -t pixmeal-backend:${{ github.sha }} .
+        run: |
+          docker build \
+            --build-arg DATABASE_URL="postgresql://pixmeal:pixmeal@localhost:5432/pixmeal" \
+            -t pixmeal-backend:${{ github.sha }} .
