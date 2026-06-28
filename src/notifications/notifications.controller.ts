@@ -9,10 +9,10 @@ import {
   Req,
 } from '@nestjs/common';
 import { Protect } from '../auth/decorators/protect.decorator';
-import { NotificationsService } from './notifications.service';
+import { AuthenticatedRequest } from '../_utils/auth-request';
 import { CreateNotificationDto } from './_utils/dto/create-notification.dto';
 import { UpdateNotificationDto } from './_utils/dto/update-notification.dto';
-
+import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -20,20 +20,20 @@ export class NotificationsController {
 
   @Get()
   @Protect()
-  findAll(@Req() req: any) {
+  findAll(@Req() req: AuthenticatedRequest) {
     return this.notificationsService.findAll(req.user);
   }
 
   @Post()
   @Protect()
-  create(@Req() req: any, @Body() dto: CreateNotificationDto) {
+  create(@Req() req: AuthenticatedRequest, @Body() dto: CreateNotificationDto) {
     return this.notificationsService.create(req.user, dto);
   }
 
   @Put(':id')
   @Protect()
   update(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateNotificationDto,
   ) {

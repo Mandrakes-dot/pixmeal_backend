@@ -4,12 +4,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { resolveAuthUserId } from '../_utils/resolve-auth-user-id';
 import { CreateMealEntryDto } from './dto/create-meal-entry.dto';
 import { UpdateMealEntryDto } from './dto/update-meal-entry.dto';
+import { AuthUserPayload } from '../_utils/auth-request';
 
 @Injectable()
 export class MealEntriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(authUser: any) {
+  async findAll(authUser: AuthUserPayload | undefined) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     return this.prisma.mealEntry.findMany({
@@ -21,7 +22,7 @@ export class MealEntriesService {
     });
   }
 
-  async findOne(authUser: any, id: number) {
+  async findOne(authUser: AuthUserPayload | undefined, id: number) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     const mealEntry = await this.prisma.mealEntry.findFirst({
@@ -41,7 +42,7 @@ export class MealEntriesService {
     return mealEntry;
   }
 
-  async create(authUser: any, dto: CreateMealEntryDto) {
+  async create(authUser: AuthUserPayload | undefined, dto: CreateMealEntryDto) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     return this.prisma.mealEntry.create({
@@ -63,7 +64,11 @@ export class MealEntriesService {
     });
   }
 
-  async update(authUser: any, id: number, dto: UpdateMealEntryDto) {
+  async update(
+    authUser: AuthUserPayload | undefined,
+    id: number,
+    dto: UpdateMealEntryDto,
+  ) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     await this.findOne(authUser, id);
@@ -88,7 +93,7 @@ export class MealEntriesService {
     });
   }
 
-  async remove(authUser: any, id: number) {
+  async remove(authUser: AuthUserPayload | undefined, id: number) {
     await this.findOne(authUser, id);
 
     await this.prisma.mealEntry.delete({

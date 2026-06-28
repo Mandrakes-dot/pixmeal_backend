@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveAuthUserId } from '../_utils/resolve-auth-user-id';
 import { UpdateCurrentUserDto } from './_utils/dto/update-current-user.dto';
+import { AuthUserPayload } from '../_utils/auth-request';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getMe(authUser: any) {
+  async getMe(authUser: AuthUserPayload | undefined) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     return this.prisma.user.findUnique({
@@ -28,7 +29,10 @@ export class UsersService {
     });
   }
 
-  async updateMe(authUser: any, dto: UpdateCurrentUserDto) {
+  async updateMe(
+    authUser: AuthUserPayload | undefined,
+    dto: UpdateCurrentUserDto,
+  ) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     return this.prisma.user.update({

@@ -1,16 +1,23 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthUserPayload } from './auth-request';
 
 export async function resolveAuthUserId(
   prisma: PrismaService,
-  authUser: any,
+  authUser?: AuthUserPayload,
 ): Promise<number> {
-  const rawId = authUser?.id ?? authUser?.userId ?? authUser?.sub;
+  const candidateIds: Array<number | string | undefined> = [
+    authUser?.id,
+    authUser?.userId,
+    authUser?.sub,
+  ];
 
-  const numericId = Number(rawId);
+  for (const candidateId of candidateIds) {
+    const numericId = Number(candidateId);
 
-  if (Number.isInteger(numericId) && numericId > 0) {
-    return numericId;
+    if (Number.isInteger(numericId) && numericId > 0) {
+      return numericId;
+    }
   }
 
   if (authUser?.email) {

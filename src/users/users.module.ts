@@ -7,16 +7,7 @@ import { UsersMapper } from './users.mapper';
 
 @Module({
   controllers: [UsersController],
-  providers: [
-    UsersService,
-    UsersRepository,
-    UsersMapper,
-    PrismaService,
-  ],
-  exports: [
-    UsersService,
-    UsersRepository,
-    UsersMapper,
-  ],
+  providers: [UsersService, UsersRepository, UsersMapper, PrismaService],
+  exports: [UsersService, UsersRepository, UsersMapper],
 })
 export class UsersModule {}

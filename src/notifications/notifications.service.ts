@@ -4,13 +4,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { resolveAuthUserId } from '../_utils/resolve-auth-user-id';
 import { CreateNotificationDto } from './_utils/dto/create-notification.dto';
 import { UpdateNotificationDto } from './_utils/dto/update-notification.dto';
-
+import { AuthUserPayload } from '../_utils/auth-request';
 
 @Injectable()
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(authUser: any) {
+  async findAll(authUser: AuthUserPayload | undefined) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     const notifications = await this.prisma.notification.findMany({
@@ -25,7 +25,10 @@ export class NotificationsService {
     return this.createDefaultNotifications(userId);
   }
 
-  async create(authUser: any, dto: CreateNotificationDto) {
+  async create(
+    authUser: AuthUserPayload | undefined,
+    dto: CreateNotificationDto,
+  ) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     return this.prisma.notification.create({
@@ -38,7 +41,11 @@ export class NotificationsService {
     });
   }
 
-  async update(authUser: any, id: number, dto: UpdateNotificationDto) {
+  async update(
+    authUser: AuthUserPayload | undefined,
+    id: number,
+    dto: UpdateNotificationDto,
+  ) {
     const userId = await resolveAuthUserId(this.prisma, authUser);
 
     const notification = await this.prisma.notification.findFirst({
