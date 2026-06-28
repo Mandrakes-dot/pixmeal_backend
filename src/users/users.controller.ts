@@ -1,9 +1,7 @@
-import { Body, Controller, Delete, Get, Put } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserMacroDto } from './_utils/dto/update-user-macro.dto';
-import { CurrentUser } from './_utils/decorator/connecter-user.decorator';
+import { Body, Controller, Get, Put, Req } from '@nestjs/common';
 import { Protect } from '../auth/decorators/protect.decorator';
-import { User } from '@prisma/client';
+import { UsersService } from './users.service';
+import { UpdateCurrentUserDto } from './_utils/dto/update-current-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -11,22 +9,13 @@ export class UsersController {
 
   @Get('me')
   @Protect()
-  getMe(@CurrentUser() user: User) {
-    return this.usersService.getUserById(user.id);
+  getMe(@Req() req: any) {
+    return this.usersService.getMe(req.user);
   }
 
-  @Put('me/macro-goal')
+  @Put('me')
   @Protect()
-  updateUserMacroGoal(
-    @Body() updateUserMacroDto: UpdateUserMacroDto,
-    @CurrentUser() user: User,
-  ) {
-    return this.usersService.updateUserMacroGoals(user.id, updateUserMacroDto);
-  }
-
-  @Delete()
-  @Protect()
-  deleteUser(@CurrentUser() user: User) {
-    return this.usersService.deleteUser(user.id);
+  updateMe(@Req() req: any, @Body() dto: UpdateCurrentUserDto) {
+    return this.usersService.updateMe(req.user, dto);
   }
 }

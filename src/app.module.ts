@@ -8,9 +8,12 @@ import { MediasModule } from './minio/medias.module';
 import { AuthModule } from './auth/auth.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { ConfigModule } from '@nestjs/config';
+import { HealthController } from './health.controller';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
+    NotificationsModule,
     MealsModule,
     UsersModule,
     MediasModule,
@@ -20,7 +23,7 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, UsersController],
+  controllers: [AppController, UsersController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}

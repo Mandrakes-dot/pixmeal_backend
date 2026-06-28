@@ -28,11 +28,11 @@ This documentation explains how another developer can install, run, test, and de
 * Prisma ORM
 * Docker
 * Docker Compose
-* Jest
+* JestHa 
 * ESLint
 * Prettier
 * GitHub Actions / CI pipeline
-
+hein
 ---
 
 ## 3. Project structure
