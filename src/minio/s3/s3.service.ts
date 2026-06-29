@@ -24,7 +24,11 @@ export class S3Service implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.checkBucketExists();
+    await this.checkBucketExists().catch((error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : 'Unknown S3 error';
+      console.warn(`S3 bucket check skipped: ${message}`);
+    });
   }
 
   async checkBucketExists() {
